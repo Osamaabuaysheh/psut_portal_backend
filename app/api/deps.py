@@ -1,41 +1,39 @@
+from curses import echo
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt  # for encryption
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
-from app.core import security
+from app import schemas
 from app.core.config import settings
-from app.core import security
-from app.db import database
-from app.crud.crud_user import CRUDUser
+from app.db.database import get_db
+from app.models.User import User
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+    tokenUrl="/login/access-token"
 )
 
 
 def get_current_user(
-        db: Session = Depends(database.get_db()), token: str = Depends(reusable_oauth2)
-) -> models.User:
+        db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
+) -> User:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.secret_key, algorithms=[settings.algorithm]
         )
         token_data = schemas.token.TokenPayload(**payload)
+        user = db.query(User).filter(User.id == token_data.sub).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
     except (jwt.JWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = db.query(models.User).filter(models.User.User.id == token_data.sub).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+
     return user
-
-
-
 
 #
 # def get_current_active_user(
