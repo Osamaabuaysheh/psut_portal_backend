@@ -15,19 +15,6 @@ from app.api.deps import get_current_user
 
 router = APIRouter()
 
-@router.get("/")
-def read_users(
-    db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
-    # current_user: models.User = Depends(deps.get_current_active_superuser),#depends:has the same shape and structure that all your path operation functions have.
-) -> Any:
-    """
-    Retrieve users.
-    """
-    users = db.query(User).offset(skip).limit(limit).all()
-    return users
-
 
 @router.post("/login/access-token", response_model=token.Token, status_code=status.HTTP_200_OK)
 def login_access_token(
@@ -58,7 +45,7 @@ def login_access_token(
 
 @router.post("/reset-password/")
 def reset_password(current_user=Depends(get_current_user)
-):
+                   ):
     """
     Reset password
     """
