@@ -5,11 +5,12 @@ from typing import Optional
 class StudentSchema(BaseModel):
     student_id: Optional[int] = None
     full_name: Optional[str] = None
+    full_name_arabic: Optional[str] = None
     email: Optional[EmailStr] = None
     hashed_password: Optional[str] = None
     colleage: Optional[str] = None
     year: Optional[int] = None
-    url: Optional[str] = None
+    url: Optional[str] = ""
 
     class Config:
         orm_mode = True
@@ -23,6 +24,7 @@ class StudentOut(StudentSchema):
 class StudentCreate(StudentSchema):
     student_id: int
     full_name: str
+    full_name_arabic: str
     email: EmailStr
     hashed_password: str
     colleage: str
@@ -32,4 +34,3 @@ class StudentCreate(StudentSchema):
 class StudentIn(StudentSchema):
     student_id: int
     hashed_password = str
-    pass

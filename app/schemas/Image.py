@@ -10,8 +10,15 @@ class Image(BaseModel):
 
 
 class ImageCreateName(BaseModel):
+    id: int
     name: str
     image: str
+
+
+class CreateStudentImage(BaseModel):
+    id: int
+    imageName: str
+    imagePath: str
 
 
 class ImageOut(ImageCreateName):

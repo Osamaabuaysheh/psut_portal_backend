@@ -1,49 +1,61 @@
-from typing import Any
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status, Body, Request, Form
 from sqlalchemy.orm import Session
+from typing import List
+from datetime import date, time
 from app.db.database import get_db
-from app.schemas.Image import ImageCreateName
-from app.models.Images import Images
-from fastapi.responses import FileResponse
+from app.models import Events, Organizers
+from app.schemas.Event import EventOut, CreateEvent, EventSchema
+from app.schemas.organizer import OrganizerSchema, OrganizerOut, OrgOut
+from app.crud.crud_events import crudEvent
 
 router = APIRouter()
 
 
-@router.post("/events/uploadImage")
-async def upload_image(
-        *,
-        db: Session = Depends(get_db),
-        file: UploadFile = File(...),
-) -> Any:
-    extension = file.filename.split(".")[1]
+@router.get('/get_All_Events', response_model=List[EventOut])
+async def get_events(*, db: Session = Depends(get_db)):
+    events = db.query(Events.Event).all()
+    for event in events:
+        org = db.query(Organizers.Organizer).where(event.event_id == Organizers.Organizer.event_id).all()
+        event = event.__dict__
+        event['organizers'] = org
+
+    return events
+
+
+@router.post('/create_Event')
+async def create_event(*, db: Session = Depends(get_db), event_image: UploadFile = File(...),
+                       organizers_images: list[UploadFile] = File(...),
+                       event_in: EventSchema = Depends()):
+    extension = event_image.filename.split(".")[1]
     if extension not in ["png", "jpg", "jpeg"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="File extension not allowed")
 
+    for org_image in organizers_images:
+        extension_orgaanizer_image = org_image.filename.split(".")[1]
+        if extension_orgaanizer_image not in ["png", "jpg", "jpeg"]:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="File extension not allowed")
+
     try:
-        with open(f'static/images/Events/{file.filename}', 'wb') as f:
-            while contents := file.file.read():
+        with open(f'static/images/Events/{event_image.filename}', 'wb') as f:
+            while contents := event_image.file.read():
                 f.write(contents)
-                image = db.query(Images).filter(Images.name == file.filename).first()
-                if not image:
-                    image_in = ImageCreateName(name=file.filename, image=f'static/images/Events/{file.filename}')
-                    db_in = Images(**image_in.dict())
-                    db.add(db_in)
-                    db.commit()
-                    db.refresh(db_in)
-                    return "Image Uploaded Successfully"
-    except Exception:
-        return {"message": "There was an error uploading the file"}
+        for org_image in organizers_images:
+            with open(f'static/images/Organizers/{org_image.filename}', 'wb') as f:
+                while contents := org_image.file.read():
+                    f.write(contents)
+
+        org_images = []
+        for image in organizers_images:
+            org_images.append(image.filename)
+
+        crudEvent.create_event(db=db, obj_in=event_in, image_name=event_image.filename,
+                               organizers_images=org_images)
+
+        return "Event Created Successfully"
+
     finally:
-        file.file.close()
-
-    return {"message": f"Successfully uploaded {file.filename}"}
-
-
-@router.get('/get_images', response_class=FileResponse)
-async def get_images(*, db: Session = Depends(get_db)):
-    image = db.query(Images).filter(Images.id == 5).first()
-    if not image:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image Not Found")
-
-    return image.image
+        event_image.file.close()
+        for org_image in organizers_images:
+            org_image.file.close()

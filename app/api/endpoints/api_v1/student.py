@@ -1,17 +1,62 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from typing import Any, List
 from datetime import timedelta
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.schemas.StudentSchema import StudentSchema, StudentOut, StudentIn
+from app.schemas.Student import StudentOut, StudentIn
 from app.models.Student import Student
 from app.schemas import token
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core import security
-
 from app.core.config import settings
+from app.crud import crudStudent, crudStudentImage
 
 router = APIRouter()
+
+
+@router.post("/create_Student", response_model=StudentOut, response_model_exclude={'url'})
+def create_student(
+        *,
+        db: Session = Depends(get_db),
+        file: UploadFile = File(...),
+        user_in: StudentIn = Depends()
+) -> Any:
+    """
+    Create new user.
+    """
+    extension = file.filename.split(".")[1]
+    if extension not in ["png", "jpg", "jpeg"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="File extension not allowed")
+
+    try:
+        with open(f'static/images/Students/{file.filename}', 'wb') as f:
+            while contents := file.file.read():
+                f.write(contents)
+                try:
+                    # Check Image
+                    image = crudStudentImage.get_by_name(db=db, image_name=file.filename)
+                    if image:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="The Image with this Name already exists in the system.")
+                    if not image:
+                        db_image = crudStudentImage.create_image(db=db, std_id=user_in.student_id,
+                                                                 filename=file.filename)
+                        # Check Users
+                        user = crudStudent.get_by_email(db=db, student_email=user_in.email)
+                        if user:
+                            raise HTTPException(
+                                status_code=400,
+                                detail="The user with this username already exists in the system.",
+                            )
+
+                    return crudStudent.create_student(db=db, obj_in=user_in)
+                except:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="BAD REQUEST")
+
+    finally:
+        file.file.close()
 
 
 @router.post('/login_Student', response_model=token.Token, status_code=status.HTTP_200_OK)
@@ -22,17 +67,16 @@ def login_access_token(
     OAuth2 compatible token login, get an access token for future requests
     """
     student = db.query(Student).filter(
-        Student.id == form_data.username).first()
-
+        Student.student_id == form_data.username).first()
     if not student:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials Username")
 
     if not security.verify_password(form_data.password, student.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials PASSWORD")
 
-    access_token = security.create_access_token(student.id,
+    access_token = security.create_access_token(student.student_id,
                                                 expires_delta=timedelta(minutes=settings.access_token_expire_minutes))
 
     return {"access_token": access_token, "token_type": "bearer"}
@@ -40,40 +84,14 @@ def login_access_token(
 
 @router.get('/get_students', response_model=List[StudentOut], response_model_exclude={'hashed_password'})
 def get_students(db: Session = Depends(get_db)):
-    users = db.query(Student).all()
+    users = crudStudent.get_multi(db=db)
+    for user in users:
+        user.url = crudStudentImage.get_by_id(db=db, student_id=user.student_id).imagePath
     return users
 
 
-# @router.get('/get_studentsbyID', response_model=List[StudentOut], response_model_exclude={'hashed_password'})
-# def get_students(db: Session = Depends(get_db), student_in=StudentIn):
-#     users = db.query(Student).filter(Student.id == student_in.id).first()
-#     return users
-
-
-@router.post("/create_Student")
-def create_student(
-        *,
-        db: Session = Depends(get_db),
-        user_in: StudentSchema
-) -> Any:
-    """
-    Create new user.
-    """
-    user = db.query(Student).filter(Student.email == user_in.email).first()
-    if user:
-        raise HTTPException(  # handling errors, exception with additional data relevant for APIs.
-            status_code=400,
-            detail="The user with this username already exists in the system.",
-        )
-    db_obj = Student(
-        id=user_in.id,
-        email=user_in.email,
-        hashed_password=get_password_hash(user_in.hashed_password),
-        full_name=user_in.full_name,
-        colleage=user_in.colleage
-    )
-    db.add(db_obj)
-    db.commit()
-    db.refresh(db_obj)
-
-    return db_obj
+@router.get("/get_studentsById/{user_id}", response_model=StudentOut, response_model_exclude={'hashed_password'})
+def get_students(db: Session = Depends(get_db), user_id: int = None):
+    user = crudStudent.get_by_id(db=db, student_id=user_id)
+    user.url = crudStudentImage.get_by_id(db=db, student_id=user_id).imagePath
+    return user
