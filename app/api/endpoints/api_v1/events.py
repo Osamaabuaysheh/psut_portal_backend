@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status, Body, Request, Form
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from datetime import date, time
 from app.db.database import get_db
-from app.models import Events, Organizers
-from app.schemas.Event import EventOut, CreateEvent, EventSchema
-from app.schemas.organizer import OrganizerSchema, OrganizerOut, OrgOut
+from app.models import Events, Organizers, User
+from app.schemas.Event import EventOut, EventSchema
 from app.crud.crud_events import crudEvent
+from app.api.deps import get_current_user
 
 router = APIRouter()
 
@@ -25,7 +24,7 @@ async def get_events(*, db: Session = Depends(get_db)):
 @router.post('/create_Event')
 async def create_event(*, db: Session = Depends(get_db), event_image: UploadFile = File(...),
                        organizers_images: list[UploadFile] = File(...),
-                       event_in: EventSchema = Depends()):
+                       event_in: EventSchema = Depends(), current_user: User.User = Depends(get_current_user)):
     extension = event_image.filename.split(".")[1]
     if extension not in ["png", "jpg", "jpeg"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -51,7 +50,7 @@ async def create_event(*, db: Session = Depends(get_db), event_image: UploadFile
             org_images.append(image.filename)
 
         crudEvent.create_event(db=db, obj_in=event_in, image_name=event_image.filename,
-                               organizers_images=org_images)
+                               organizers_images=org_images, current_user=current_user.id)
 
         return "Event Created Successfully"
 
@@ -59,3 +58,9 @@ async def create_event(*, db: Session = Depends(get_db), event_image: UploadFile
         event_image.file.close()
         for org_image in organizers_images:
             org_image.file.close()
+
+
+@router.post('/delete_event{event_id}')
+async def delete_event(*, db: Session = Depends(get_db), event_id: int,
+                       current_user: User.User = Depends(get_current_user)):
+    return crudEvent.delete_event_by_id(db=db, event_id=event_id)

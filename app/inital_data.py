@@ -30,6 +30,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
+    user_role = Column(String, nullable=False)
 
 
 class UserBase(BaseModel):
@@ -37,6 +38,7 @@ class UserBase(BaseModel):
     is_active: Optional[bool] = True
     is_superuser: bool = False
     full_name: Optional[str] = None
+    user_role: Optional[str] = None
 
 
 # Properties to receive via API on creation
@@ -50,14 +52,17 @@ def init_db(db: Session) -> None:
     if not user:
         user_in = UserCreate(
             email='admin@psutPortal.com',
+            full_name="Admin User",
             password='admin',
             is_superuser=True,
+            user_role="SUPERUSER"
         )
         db_obj = User(
             email=user_in.email,
             hashed_password=pwd_context.hash(user_in.password),
             full_name=user_in.full_name,
             is_superuser=user_in.is_superuser,
+            user_role=user_in.user_role
         )
         db.add(db_obj)
         db.commit()

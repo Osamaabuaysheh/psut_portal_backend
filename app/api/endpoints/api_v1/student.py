@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.Student import StudentOut, StudentIn
 from app.models.Student import Student
+from app.models.User import User
+from app.api.deps import get_current_user
 from app.schemas import token
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core import security
@@ -19,7 +21,8 @@ def create_student(
         *,
         db: Session = Depends(get_db),
         file: UploadFile = File(...),
-        user_in: StudentIn = Depends()
+        user_in: StudentIn = Depends(),
+        current_user: User = Depends(get_current_user)
 ) -> Any:
     """
     Create new user.
@@ -83,7 +86,7 @@ def login_access_token(
 
 
 @router.get('/get_students', response_model=List[StudentOut], response_model_exclude={'hashed_password'})
-def get_students(db: Session = Depends(get_db)):
+def get_students(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     users = crudStudent.get_multi(db=db)
     for user in users:
         user.url = crudStudentImage.get_by_id(db=db, student_id=user.student_id).imagePath
@@ -93,5 +96,9 @@ def get_students(db: Session = Depends(get_db)):
 @router.get("/get_studentsById/{user_id}", response_model=StudentOut, response_model_exclude={'hashed_password'})
 def get_students(db: Session = Depends(get_db), user_id: int = None):
     user = crudStudent.get_by_id(db=db, student_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"No Student With This ID")
     user.url = crudStudentImage.get_by_id(db=db, student_id=user_id).imagePath
+
     return user

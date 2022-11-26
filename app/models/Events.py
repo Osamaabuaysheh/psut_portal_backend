@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Time
+from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey
 from app.db.base_class import Base
 from sqlalchemy.orm import relationship
 
@@ -14,4 +14,4 @@ class Event(Base):
     end_date = Column(Date, nullable=False)
     description = Column(String, nullable=False)
     image = Column(String, nullable=True)
-    organizers = relationship("Organizer")
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)

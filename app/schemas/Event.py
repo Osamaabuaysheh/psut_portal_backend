@@ -1,7 +1,6 @@
 from datetime import date, time
-from sqlalchemy.dialects.postgresql import ARRAY
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from app.schemas.organizer import OrganizerSchema
 
 
@@ -29,16 +28,19 @@ class CreateEvent(EventSchema):
     end_time: time
     organizers: list[str]
     description: str
+    owner_id: int
 
     class Config:
         orm_mode = True
 
 
 class EventOut(EventSchema):
+    event_id: Optional[int] = None
     event_name: str
     location: str
     start_date: date
     end_date: date
+
     start_time: time
     end_time: time
     description: str
@@ -47,3 +49,20 @@ class EventOut(EventSchema):
 
     class Config:
         orm_mode = True
+
+
+class ClubsEventSchema(EventSchema):
+    club_name: str
+
+    class Config:
+        orm_mode = True
+
+
+class ClubEventOut(EventOut):
+    club_name: str
+
+    pass
+
+
+class ClubEventCreate(EventSchema):
+    pass

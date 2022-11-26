@@ -4,9 +4,7 @@ from app.api.api import api_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-
-origins = ["*"]
-
+origins = ["*", 'http://localhost:3000']
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")

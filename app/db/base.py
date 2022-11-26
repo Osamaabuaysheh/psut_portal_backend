@@ -4,3 +4,7 @@ from app.models.Student import Student  # noqa
 from app.models.StudentImages import StudentImages  # noqa
 from app.models.Events import Event  # noqa
 from app.models.Organizers import Organizer # noqa
+from app.models.Club import Club # noqa
+from app.models.BusRoute import BusRoute # noqa
+from app.models.Job import Job # noqa
+from app.models.Club_Event import ClubEvent # noqa
