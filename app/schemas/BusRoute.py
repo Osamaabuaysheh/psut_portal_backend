@@ -39,8 +39,5 @@ class BusRouteOut(BaseModel):
         orm_mode = True
 
 
-
-
-
 class BusRouteUpdate(BusRouteSchema):
     pass

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from app.api.endpoints.api_v1 import login, users, events, student, clubs, BusRoute, job
+from app.api.endpoints.api_v1 import login, users, events, student, clubs, BusRoute, job, CSOEvents, Tutor, Course, \
+    CourseSession, TutorRequests
 
 api_router = APIRouter()
 
@@ -10,3 +11,8 @@ api_router.include_router(events.router, tags=["Events"])
 api_router.include_router(clubs.router, tags=["clubs"])
 api_router.include_router(BusRoute.router, tags=["Bus Route"])
 api_router.include_router(job.router, tags=["Jobs"])
+api_router.include_router(CSOEvents.router, tags=["CSO Events"])
+api_router.include_router(Tutor.router, tags=["Tutors"])
+api_router.include_router(Course.router, tags=["Courses"])
+api_router.include_router(CourseSession.router, tags=["Course Session"])
+api_router.include_router(TutorRequests.router, tags=["Tutor Requests"])
