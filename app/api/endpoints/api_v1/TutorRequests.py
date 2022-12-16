@@ -16,4 +16,7 @@ async def get_Requests(*, db: Session = Depends(get_db)):
 
 @router.post('/Create_Request')
 async def create_request(*, db: Session = Depends(get_db), obj_in: TutorRequestCreate = Depends()):
-    return crudTutorRequest.create_request(db=db, obj_in=obj_in)
+    db_obj = crudTutorRequest.create_request(db=db, obj_in=obj_in)
+    if not db_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
+    return db_obj

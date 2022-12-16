@@ -1,18 +1,25 @@
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.db.database import get_db
-from app.models import CourseSession, User
-from app.schemas.courseSession import CreateCourseSession
-from app.crud.crud_course_session import crudCourseSession
+
 from app.api.deps import get_current_user
+from app.crud.crud_course_session import crudCourseSession
+from app.db.database import get_db
+from app.models import CourseSession, User, SessionEnrolled
+from app.schemas.courseSession import CreateCourseSession
 
 router = APIRouter()
 
 
 @router.get('/get_All_Courses_Sessions')
 async def get_course_session(*, db: Session = Depends(get_db)):
-    return db.query(CourseSession.CourseSession).all()
+    sessions = db.query(CourseSession.CourseSession).all()
+    for session in sessions:
+        total = db.query(SessionEnrolled.SessionEnrolled).where(
+            session.session_id == SessionEnrolled.SessionEnrolled.sessionId).count()
+        session = session.__dict__
+        session['total'] = total
 
+    return sessions
 
 @router.post('/Create_Course_Session')
 async def create_course_session(*, db: Session = Depends(get_db), obj_in: CreateCourseSession = Depends(),

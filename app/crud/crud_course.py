@@ -1,6 +1,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session
 from app.crud.base import CRUDBase
+from app.models import SessionEnrolled
 from app.models.Course import Course
 from app.models.course_tutor import CourseTutor
 from app.schemas.Course import CreateCourse, UpdateCourse
@@ -18,6 +19,12 @@ class CRUDCourse(CRUDBase[Course, CreateCourse, UpdateCourse]):
     def get_course_details(self, db: Session):
         courses = db.query(Course).all()
         all_courses = []
+        sessions = db.query(CourseSession).all()
+        for session in sessions:
+            total = db.query(SessionEnrolled.SessionEnrolled).where(
+                session.session_id == SessionEnrolled.SessionEnrolled.sessionId).count()
+            session = session.__dict__
+            session['total'] = total
         for course in courses:
             course_sessions = db.query(CourseSession).filter(
                 course.course_id == CourseSession.course_id).all()
@@ -26,6 +33,7 @@ class CRUDCourse(CRUDBase[Course, CreateCourse, UpdateCourse]):
             course = course.__dict__
             course['sessions'] = course_sessions
             course['Tutor'] = course_tutors
+            course['total'] = sessions
             all_courses.append(course)
         return all_courses
 

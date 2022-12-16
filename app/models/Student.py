@@ -11,4 +11,5 @@ class Student(Base):
     colleage = Column(String, nullable=False)
     year = Column(Integer, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
+    hours_completed = Column(Integer, nullable=False)
     hashed_password = Column(String, nullable=False)

@@ -11,6 +11,7 @@ class StudentSchema(BaseModel):
     colleage: Optional[str] = None
     year: Optional[int] = None
     url: Optional[str] = ""
+    hours_completed: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -29,6 +30,7 @@ class StudentCreate(StudentSchema):
     hashed_password: str
     colleage: str
     year: int
+    hours_completed: int
 
 
 class StudentIn(StudentSchema):

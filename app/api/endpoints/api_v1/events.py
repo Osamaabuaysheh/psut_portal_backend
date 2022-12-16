@@ -1,11 +1,13 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+
+from app.api.deps import get_current_user
+from app.crud.crud_events import crudEvent
 from app.db.database import get_db
 from app.models import Events, Organizers, User
 from app.schemas.Event import EventOut, EventSchema
-from app.crud.crud_events import crudEvent
-from app.api.deps import get_current_user
 
 router = APIRouter()
 
@@ -15,8 +17,10 @@ async def get_events(*, db: Session = Depends(get_db)):
     events = db.query(Events.Event).all()
     for event in events:
         org = db.query(Organizers.Organizer).where(event.event_id == Organizers.Organizer.event_id).all()
+        owner = db.query(User.User).filter(User.User.id == event.owner_id).first()
         event = event.__dict__
         event['organizers'] = org
+        event['owner_role'] = owner.user_role
 
     return events
 
@@ -26,14 +30,15 @@ async def create_event(*, db: Session = Depends(get_db), event_image: UploadFile
                        organizers_images: list[UploadFile] = File(...),
                        event_in: EventSchema = Depends(), current_user: User.User = Depends(get_current_user)):
     extension = event_image.filename.split(".")[1]
-    if extension not in ["png", "jpg", "jpeg"]:
+    if extension not in ["png", "jpg", "jpeg", "gif"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="File extension not allowed")
 
     for org_image in organizers_images:
         extension_orgaanizer_image = org_image.filename.split(".")[1]
-        if extension_orgaanizer_image not in ["png", "jpg", "jpeg"]:
+        if extension_orgaanizer_image not in ["png", "jpg", "jpeg", "gif"]:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+
                                 detail="File extension not allowed")
 
     try:

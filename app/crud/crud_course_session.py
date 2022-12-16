@@ -1,10 +1,11 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app.crud.base import CRUDBase
 from app.models.CourseSession import CourseSession
-from app.models.course_tutor import CourseTutor
-from app.schemas.courseSession import CreateCourseSession, UpdateCourseSession
 from app.models.Tutor import Tutor
+from app.schemas.courseSession import CreateCourseSession, UpdateCourseSession
 
 
 class CRUDCourseSession(CRUDBase[CourseSession, CreateCourseSession, UpdateCourseSession]):

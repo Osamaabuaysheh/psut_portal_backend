@@ -11,7 +11,6 @@ class CRUDTutorRequest(CRUDBase[TutorRequests, TutorRequestCreate, TutorRequestU
         return db.query(self.model).filter(TutorRequests.tutor_request_id == tutorRequest_id).first()
 
     def create_request(self, db: Session, *, obj_in: TutorRequestCreate):
-        tutor_name = db.query(Student).filter(obj_in.student_id == Student.student_id).first()
         db_obj = TutorRequests(
             semester_completion=obj_in.semster_completion,
             student_id=obj_in.student_id,

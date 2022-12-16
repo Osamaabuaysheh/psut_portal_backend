@@ -24,7 +24,8 @@ class CRUDStudent(CRUDBase[Student, UserCreate, UserUpdate]):
             colleage=obj_in.colleage,
             year=obj_in.year,
             student_image_id=obj_in.student_id,
-            full_name_arabic=obj_in.full_name_arabic
+            full_name_arabic=obj_in.full_name_arabic,
+            hours_completed=obj_in.hours_completed
         )
         db.add(db_obj)
         db.commit()

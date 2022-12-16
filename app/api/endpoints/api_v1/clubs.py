@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from typing import List
+
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
-from app.db.database import get_db
+
+from app.api.deps import get_current_user
 from app.crud.crud_clubs import crudClubs
 from app.crud.crud_event_club import crudEventClub
-from app.schemas.clubs import ClubsSchema, CreateClub
-from app.schemas.Event import ClubsEventSchema, ClubEventOut
-from app.api.deps import get_current_user
-from app.models.User import User
+from app.db.database import get_db
 from app.models import Organizers
+from app.models.User import User
+from app.schemas.Event import ClubsEventSchema, ClubEventOut
+from app.schemas.clubs import ClubsSchema, CreateClub
 
 router = APIRouter()
 
@@ -104,8 +106,10 @@ async def get_club_events(*, db: Session = Depends(get_db)):
     for event in events:
         org = db.query(Organizers.Organizer).where(event.event_id == Organizers.Organizer.event_id).all()
         club = crudEventClub.get_club_event_name(db=db, event_id=event.event_id)
+        owner = db.query(User).filter(User.id == event.owner_id).first()
         event = event.__dict__
         event['organizers'] = org
         event['club_name'] = club.club_name
+        event['owner_role'] = owner.user_role
 
     return events

@@ -1,6 +1,8 @@
 from datetime import date, time
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel
+
 from app.schemas.organizer import OrganizerSchema
 
 
@@ -40,12 +42,12 @@ class EventOut(EventSchema):
     location: str
     start_date: date
     end_date: date
-
     start_time: time
     end_time: time
     description: str
     organizers: list[OrganizerSchema]
     image: str
+    owner_role: str
 
     class Config:
         orm_mode = True
