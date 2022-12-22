@@ -1,10 +1,19 @@
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel
 
 
 class OrganizerSchema(BaseModel):
     organizer_name: str
     organizer_image: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+class OrganizerCreate(BaseModel):
+    organizer_name: str
+    # organizer_image: str
 
     class Config:
         orm_mode = True

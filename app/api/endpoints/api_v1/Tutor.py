@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_user
+from app.crud.crud_tutor import crudTutor
 from app.db.database import get_db
 from app.models import Tutor, User
 from app.schemas.Tutor import TutorCreate
-from app.crud.crud_tutor import crudTutor
-from app.api.deps import get_current_user
 
 router = APIRouter()
 

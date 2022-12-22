@@ -1,6 +1,7 @@
-from pydantic import BaseModel
-from typing import Optional
 from datetime import date
+from typing import Optional
+
+from pydantic import BaseModel
 
 
 class JobSchema(BaseModel):
@@ -46,4 +47,11 @@ class JobOut(BaseModel):
 
 
 class JobUpdate(BaseModel):
+    company_name: Optional[str]
+    job_title: Optional[str]
+    job_responsanbilities: Optional[str]
+    job_requierments: Optional[str]
+    college: Optional[str]
+    job_Deadline: Optional[date]
+    job_description: Optional[str]
     pass

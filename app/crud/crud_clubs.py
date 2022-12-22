@@ -1,8 +1,10 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app.crud.base import CRUDBase
 from app.models.Club import Club
-from app.schemas.clubs import ClubsSchema, ClubUpdate, CreateClub
+from app.schemas.clubs import ClubUpdate, CreateClub
 
 
 class CRUDClubs(CRUDBase[Club, CreateClub, ClubUpdate]):
@@ -12,9 +14,14 @@ class CRUDClubs(CRUDBase[Club, CreateClub, ClubUpdate]):
     def get_by_name(self, db: Session, *, club_name: str) -> Optional[Club]:
         return db.query(self.model).filter(Club.club_name == club_name).first()
 
+    def delete_club_by_id(self, db: Session, *, club_id: int):
+        db.query(self.model).filter(Club.club_id == club_id).delete()
+        db.commit()
+
+
     def create_club(self, db: Session, *, obj_in: CreateClub, club_icon_image: str, club_background_image: str):
         db_obj = Club(
-            club_name=obj_in.club_name.lower(),
+            club_name=obj_in.club_name.upper(),
             description=obj_in.description,
             contact_info=obj_in.contact_info,
             link=obj_in.link,

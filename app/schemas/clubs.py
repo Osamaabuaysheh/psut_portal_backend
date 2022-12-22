@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel
 
 
 class ClubsSchema(BaseModel):
@@ -22,5 +23,11 @@ class CreateClub(BaseModel):
     contact_info: str
 
 
-class ClubUpdate(ClubsSchema):
-    pass
+class ClubUpdate(BaseModel):
+    club_name: Optional[str] = None
+    description: Optional[str] = None
+    link: Optional[str] = None
+    contact_info: Optional[str] = None
+
+    class Config:
+        orm_mode = True

@@ -17,3 +17,5 @@ from app.models.Tutor import Tutor  # noqa
 from app.models.TutorRequests import TutorRequests  # noqa
 from app.models.User import User  # noqa
 from app.models.course_tutor import CourseTutor  # noqa
+from app.models.EventOrganizer import EventOrganizer  # noqa
+

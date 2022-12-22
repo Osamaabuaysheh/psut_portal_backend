@@ -1,5 +1,7 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app.crud.base import CRUDBase
 from app.models.Job import Job
 from app.schemas.job import JobCreate, JobUpdate
@@ -28,6 +30,10 @@ class CRUDJobs(CRUDBase[Job, JobCreate, JobUpdate]):
         db.refresh(db_obj)
 
         return db_obj
+
+    def delete_job_by_id(self, db: Session, *, job_id: int):
+        db.query(self.model).filter(Job.job_id == job_id).delete()
+        db.commit()
 
 
 crudJob = CRUDJobs(Job)

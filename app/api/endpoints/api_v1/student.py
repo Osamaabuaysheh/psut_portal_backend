@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
-from typing import Any, List
 from datetime import timedelta
-from sqlalchemy.orm import Session
-from app.db.database import get_db
-from app.schemas.Student import StudentOut, StudentIn
-from app.models.Student import Student
-from app.models.User import User
-from app.api.deps import get_current_user
-from app.schemas import token
+from typing import Any, List
+
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_user, get_current_student
 from app.core import security
 from app.core.config import settings
 from app.crud import crudStudent, crudStudentImage
+from app.db.database import get_db
+from app.models.Student import Student
+from app.models.User import User
+from app.schemas import token
+from app.schemas.Student import StudentOut, StudentIn
 
 router = APIRouter()
 
@@ -62,7 +64,7 @@ def create_student(
         file.file.close()
 
 
-@router.post('/login_Student', response_model=token.Token, status_code=status.HTTP_200_OK)
+@router.post('/login_Student/access-token', response_model=token.Token, status_code=status.HTTP_200_OK)
 def login_access_token(
         db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
@@ -94,7 +96,8 @@ def get_students(db: Session = Depends(get_db), current_user: User = Depends(get
 
 
 @router.get("/get_studentsById/{user_id}", response_model=StudentOut, response_model_exclude={'hashed_password'})
-def get_students(db: Session = Depends(get_db), user_id: int = None):
+def get_students(db: Session = Depends(get_db), user_id: int = None,
+                 current_user: User = Depends(get_current_student)):
     user = crudStudent.get_by_id(db=db, student_id=user_id)
     if not user:
         raise HTTPException(
@@ -102,3 +105,12 @@ def get_students(db: Session = Depends(get_db), user_id: int = None):
     user.url = crudStudentImage.get_by_id(db=db, student_id=user_id).imagePath
 
     return user
+
+
+@router.post("/login_student")
+def login_student(
+        *,
+        db: Session = Depends(get_db),
+        current_user: Student = Depends(get_current_student),
+) -> Any:
+    return current_user

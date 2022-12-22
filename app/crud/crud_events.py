@@ -1,12 +1,28 @@
-from typing import Optional
+from typing import Optional, Union, Dict, Any
+
 from sqlalchemy.orm import Session
+
 from app.crud.base import CRUDBase
+from app.models.EventOrganizer import EventOrganizer
 from app.models.Events import Event
 from app.models.Organizers import Organizer
-from app.schemas.Event import CreateEvent, EventOut
+from app.models.User import User
+from app.schemas.Event import CreateEvent, EventOut, UpadteEvent
 
 
 class CRUDEvents(CRUDBase[Event, CreateEvent, EventOut]):
+    def get_all_events(self, db: Session) -> Optional[list[Event]]:
+        events = db.query(Event).all()
+        for event in events:
+            org = db.query(Organizer).filter(
+                EventOrganizer.event_id == event.event_id).filter(
+                EventOrganizer.organizer_id == Organizer.organizer_id).all()
+            owner = db.query(User).filter(User.id == event.owner_id).first()
+            event = event.__dict__
+            event['organizers'] = org
+            event['owner_role'] = owner.user_role
+        return events
+
     def get_by_id(self, db: Session, *, event_id: int) -> Optional[Event]:
         return db.query(self.model).filter(Event.event_id == event_id).first()
 
@@ -22,7 +38,7 @@ class CRUDEvents(CRUDBase[Event, CreateEvent, EventOut]):
             db.commit()
             return "Event Deleted"
 
-    def create_event(self, db: Session, *, obj_in: CreateEvent, image_name: str, organizers_images: list,
+    def create_event(self, db: Session, *, obj_in: CreateEvent, image_name: str, organizers,
                      current_user: int):
         db_obj = Event(
             event_name=obj_in.event_name,
@@ -38,16 +54,25 @@ class CRUDEvents(CRUDBase[Event, CreateEvent, EventOut]):
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
-        obj_in.organizers = obj_in.organizers[0].split(',')
-        for i in range(len(obj_in.organizers)):
-            db_obj_organizers = Organizer(organizer_image=f'static/images/Organizers/{organizers_images[i]}',
-                                          event_id=db_obj.event_id,
-                                          organizer_name=obj_in.organizers[i])
-            db.add(db_obj_organizers)
+        obj_in.organizers = organizers.split(',')
+        for i in obj_in.organizers:
+            db_obj_organizers_events = EventOrganizer(event_id=db_obj.event_id, organizer_id=i)
+            db.add(db_obj_organizers_events)
             db.commit()
-            db.refresh(db_obj_organizers)
+            db.refresh(db_obj_organizers_events)
 
         return db_obj
+
+    def update(self, db: Session, *, db_obj: Event, obj_in: Union[UpadteEvent, Dict[str, Any]]
+               ):
+        # return Event()
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+            print(update_data)
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
+            print(update_data)
+        # return super().update(db, db_obj=db_obj, obj_in=update_data)
 
 
 crudEvent = CRUDEvents(Event)

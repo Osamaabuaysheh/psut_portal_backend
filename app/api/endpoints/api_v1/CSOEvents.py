@@ -1,16 +1,24 @@
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_user, get_current_student
+from app.crud.crud_cso_event import crudCSOEvents
 from app.db.database import get_db
 from app.models import CSOEvents, User
+from app.models.Student import Student
 from app.schemas.CSOEvents import CreateCSOEvent
-from app.crud.crud_cso_event import crudCSOEvents
-from app.api.deps import get_current_user
 
 router = APIRouter()
 
 
 @router.get('/get_All_CSO_Events')
-async def get_cso_events(*, db: Session = Depends(get_db)):
+async def get_cso_events(*, db: Session = Depends(get_db), current_user: User.User = Depends(get_current_user)):
+    return db.query(CSOEvents.CSOEVENTS).all()
+
+
+@router.get('/get_All_CSO_Events_Students')
+async def get_cso_events_students(*, db: Session = Depends(get_db),
+                                  current_user: Student = Depends(get_current_student)):
     return db.query(CSOEvents.CSOEVENTS).all()
 
 

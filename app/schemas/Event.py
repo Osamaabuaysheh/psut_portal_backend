@@ -7,7 +7,6 @@ from app.schemas.organizer import OrganizerSchema
 
 
 class EventSchema(BaseModel):
-    # event_id: Optional[int] = None
     event_name: Optional[str] = None
     location: Optional[str] = None
     start_date: Optional[date] = None
@@ -28,9 +27,23 @@ class CreateEvent(EventSchema):
     end_date: date
     start_time: time
     end_time: time
-    organizers: list[str]
+    organizers: Optional[list[str]] = None
     description: str
     owner_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class UpadteEvent(EventSchema):
+    event_name: Optional[str] = None
+    location: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    description: Optional[str] = None
+    organizers: Optional[list[str]] = None
 
     class Config:
         orm_mode = True
@@ -54,7 +67,7 @@ class EventOut(EventSchema):
 
 
 class ClubsEventSchema(EventSchema):
-    club_name: str
+    club_id: int
 
     class Config:
         orm_mode = True

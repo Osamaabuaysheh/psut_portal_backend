@@ -7,7 +7,6 @@ class Organizer(Base):
     organizer_id = Column(Integer, primary_key=True, index=True)
     organizer_name = Column(String, nullable=False)
     organizer_image = Column(String, nullable=False)
-    event_id = Column(Integer, ForeignKey("Events.event_id", ondelete="CASCADE"), nullable=False)
 
 
 
