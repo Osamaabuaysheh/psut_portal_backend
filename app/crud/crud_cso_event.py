@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 from app.crud.base import CRUDBase
 from app.models.CSOEvents import CSOEVENTS
 from app.schemas.CSOEvents import CSOEventSchema, CreateCSOEvent
@@ -7,6 +8,12 @@ from app.schemas.CSOEvents import CSOEventSchema, CreateCSOEvent
 class CRUDCSOEvents(CRUDBase[CSOEVENTS, CSOEventSchema, CreateCSOEvent]):
     def get_club_event_name(self, db: Session, event_id: int):
         return db.query(CSOEVENTS).filter(CSOEVENTS.event_id == event_id).first()
+
+    def delete_cso_event(self, db: Session, event_id: int):
+        db_obj = db.query(CSOEVENTS).filter(CSOEVENTS.event_id == event_id).delete()
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
 
     def get_cso_event_name(self, db: Session, *, event_name: str):
         return db.query(self.model).filter(CSOEVENTS.event_name == event_name).first()

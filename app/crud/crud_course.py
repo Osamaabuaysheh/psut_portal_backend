@@ -1,12 +1,14 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app.crud.base import CRUDBase
 from app.models import SessionEnrolled
 from app.models.Course import Course
+from app.models.CourseSession import CourseSession
+from app.models.Tutor import Tutor
 from app.models.course_tutor import CourseTutor
 from app.schemas.Course import CreateCourse, UpdateCourse
-from app.models.Tutor import Tutor
-from app.models.CourseSession import CourseSession
 
 
 class CRUDCourse(CRUDBase[Course, CreateCourse, UpdateCourse]):
@@ -15,6 +17,12 @@ class CRUDCourse(CRUDBase[Course, CreateCourse, UpdateCourse]):
 
     def get_by_name(self, db: Session, *, course_name: str) -> Optional[Course]:
         return db.query(self.model).filter(Course.course_name == course_name).first()
+
+    def delete_course(self, db: Session, *, course_id: int):
+        db_obj = db.query(self.model).filter(Course.course_id == course_id).delete()
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
 
     def get_course_details(self, db: Session):
         courses = db.query(Course).all()

@@ -50,7 +50,7 @@ async def get_jobs(*, db: Session = Depends(get_db), job_id: int,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Job Doesn't Exist")
     else:
         crudJob.delete_job_by_id(db=db, job_id=job_id)
-        raise HTTPException(status_code=status.HTTP_200_OK, detail="Club Deleted Successfully")
+        raise HTTPException(status_code=status.HTTP_200_OK, detail="Job Deleted Successfully")
 
 
 @router.patch('/job_id/{job_id}')

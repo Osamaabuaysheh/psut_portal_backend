@@ -5,7 +5,9 @@ from app.models.CSOEventsAttended import CSOEventsAttended  # noqa
 from app.models.Club import Club  # noqa
 from app.models.Club_Event import ClubEvent  # noqa
 from app.models.Course import Course  # noqa
+from app.models.CourseRequests import CourseRequests  # noqa
 from app.models.CourseSession import CourseSession  # noqa
+from app.models.EventOrganizer import EventOrganizer  # noqa
 from app.models.Events import Event  # noqa
 from app.models.Job import Job  # noqa
 from app.models.Organizers import Organizer  # noqa
@@ -17,5 +19,3 @@ from app.models.Tutor import Tutor  # noqa
 from app.models.TutorRequests import TutorRequests  # noqa
 from app.models.User import User  # noqa
 from app.models.course_tutor import CourseTutor  # noqa
-from app.models.EventOrganizer import EventOrganizer  # noqa
-

@@ -134,4 +134,5 @@ async def update_club(*, db: Session = Depends(get_db), club_id: int,
                       club_icon_image: UploadFile = File(...)):
     db_obj = db.query(Club.Club).filter(Club.Club.club_id == club_id).update(values=club_in.dict(exclude_none=True))
     db.commit()
+    db.refresh(db_obj)
     return db_obj

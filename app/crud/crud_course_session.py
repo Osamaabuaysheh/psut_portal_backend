@@ -12,6 +12,12 @@ class CRUDCourseSession(CRUDBase[CourseSession, CreateCourseSession, UpdateCours
     def get_by_id(self, db: Session, *, course_session_id: int) -> Optional[CourseSession]:
         return db.query(CourseSession).filter(CourseSession.session_id == course_session_id).first()
 
+    def delete_session(self, db: Session, *, course_session_id: int):
+        session = db.query(CourseSession).filter(CourseSession.session_id == course_session_id).delete()
+        db.commit()
+        db.refresh(session)
+        return session
+
     def get_by_name(self, db: Session, *, course_session_name: str) -> Optional[CourseSession]:
         return db.query(self.model).filter(CourseSession.course_name == course_session_name).first()
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -21,13 +21,20 @@ async def get_course_session(*, db: Session = Depends(get_db)):
 
     return sessions
 
+
 @router.post('/Create_Course_Session')
 async def create_course_session(*, db: Session = Depends(get_db), obj_in: CreateCourseSession = Depends(),
                                 current_user: User.User = Depends(get_current_user)):
     return crudCourseSession.create_course_session(db=db, obj_in=obj_in)
 
-#
-# @router.post('/get_tutor_details')
-# async def create_course(*, db: Session = Depends(get_db), obj_in: CreateCourse = Depends(),
-#                         current_user: User.User = Depends(get_current_user)):
-#     return crudCourse.create_course(db=db, obj_in=obj_in)
+
+@router.delete('/delete_course_session/{course_session_id}')
+async def create_course_session(*, db: Session = Depends(get_db), course_session_id: int,
+                                current_user: User.User = Depends(get_current_user)):
+    course_session = db.query(CourseSession.CourseSession).filter(
+        CourseSession.CourseSession.session_id == course_session_id)
+    if course_session.first() is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Session Doesn't Exist")
+    else:
+        crudCourseSession.delete_session(db=db, course_session_id=course_session_id)
+        raise HTTPException(status_code=status.HTTP_200_OK, detail="Session Deleted Successfully")

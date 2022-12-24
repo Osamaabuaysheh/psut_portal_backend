@@ -32,6 +32,7 @@ class CRUDEventClub(CRUDBase[ClubEvent, ClubsEventSchema, ClubEventCreate]):
     def delete_event_by_id(self, db: Session, event_id: int):
         db_obj = db.query(Event).filter(Event.event_id == event_id).delete()
         db.commit()
+        db.refresh(db_obj)
         return db_obj
 
 

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_current_student
 from app.crud.crud_permit_holder import crudPermitHolders
 from app.db.database import get_db
+from app.models.Student import Student
 from app.models.User import User
 from app.schemas.permitHolders import PermitHolderCreate
 
@@ -21,8 +22,9 @@ async def create_permit_holder(*, db: Session = Depends(get_db), obj_in: PermitH
     return crudPermitHolders.create_permit_holder(db=db, obj_in=obj_in, current_user=current_user.id)
 
 
-@router.get('/get_permit_by_student_id/{student_id}')
-async def get_permit_holder_by_student_id(*, db: Session = Depends(get_db), student_id: int):
+@router.get('/get_permit_by_student_id_student/{student_id}')
+async def get_permit_holder_by_student_id(*, db: Session = Depends(get_db), student_id: int,
+                                          current_user: Student = Depends(get_current_student)):
     return crudPermitHolders.get_by_student_id(db=db, student_id=student_id)
 
 

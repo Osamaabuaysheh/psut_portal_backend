@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict, Any
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -7,7 +7,7 @@ from app.models.EventOrganizer import EventOrganizer
 from app.models.Events import Event
 from app.models.Organizers import Organizer
 from app.models.User import User
-from app.schemas.Event import CreateEvent, EventOut, UpadteEvent
+from app.schemas.Event import CreateEvent, EventOut
 
 
 class CRUDEvents(CRUDBase[Event, CreateEvent, EventOut]):
@@ -36,6 +36,7 @@ class CRUDEvents(CRUDBase[Event, CreateEvent, EventOut]):
         else:
             event.delete()
             db.commit()
+            db.refresh(event)
             return "Event Deleted"
 
     def create_event(self, db: Session, *, obj_in: CreateEvent, image_name: str, organizers,
@@ -62,17 +63,6 @@ class CRUDEvents(CRUDBase[Event, CreateEvent, EventOut]):
             db.refresh(db_obj_organizers_events)
 
         return db_obj
-
-    def update(self, db: Session, *, db_obj: Event, obj_in: Union[UpadteEvent, Dict[str, Any]]
-               ):
-        # return Event()
-        if isinstance(obj_in, dict):
-            update_data = obj_in
-            print(update_data)
-        else:
-            update_data = obj_in.dict(exclude_unset=True)
-            print(update_data)
-        # return super().update(db, db_obj=db_obj, obj_in=update_data)
 
 
 crudEvent = CRUDEvents(Event)

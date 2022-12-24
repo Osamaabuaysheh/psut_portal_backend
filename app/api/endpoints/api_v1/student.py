@@ -97,6 +97,19 @@ def get_students(db: Session = Depends(get_db), current_user: User = Depends(get
 
 @router.get("/get_studentsById/{user_id}", response_model=StudentOut, response_model_exclude={'hashed_password'})
 def get_students(db: Session = Depends(get_db), user_id: int = None,
+                 current_user: User = Depends(get_current_user)):
+    user = crudStudent.get_by_id(db=db, student_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"No Student With This ID")
+    user.url = crudStudentImage.get_by_id(db=db, student_id=user_id).imagePath
+
+    return user
+
+
+@router.get("/get_studentsById_student/{user_id}", response_model=StudentOut,
+            response_model_exclude={'hashed_password'})
+def get_students(db: Session = Depends(get_db), user_id: int = None,
                  current_user: User = Depends(get_current_student)):
     user = crudStudent.get_by_id(db=db, student_id=user_id)
     if not user:

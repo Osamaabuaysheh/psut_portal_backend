@@ -32,8 +32,9 @@ class CRUDJobs(CRUDBase[Job, JobCreate, JobUpdate]):
         return db_obj
 
     def delete_job_by_id(self, db: Session, *, job_id: int):
-        db.query(self.model).filter(Job.job_id == job_id).delete()
+        db_obj = db.query(self.model).filter(Job.job_id == job_id).delete()
         db.commit()
+        db.refresh(db_obj)
 
 
 crudJob = CRUDJobs(Job)
