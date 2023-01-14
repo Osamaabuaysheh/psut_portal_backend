@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Float
+
 from app.db.base_class import Base
 
 
@@ -13,3 +14,4 @@ class Student(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hours_completed = Column(Integer, nullable=False)
     hashed_password = Column(String, nullable=False)
+    gpa = Column(Float, nullable=False, server_default="0")

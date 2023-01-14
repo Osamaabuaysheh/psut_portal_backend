@@ -1,11 +1,13 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
+from app.core import security
 from app.crud.base import CRUDBase
 from app.models.Student import Student
 from app.models.StudentImages import StudentImages
-from app.schemas.User import UserCreate, UserUpdate
 from app.schemas.Student import StudentCreate
-from app.core import security
+from app.schemas.User import UserCreate, UserUpdate
 
 
 class CRUDStudent(CRUDBase[Student, UserCreate, UserUpdate]):
@@ -25,8 +27,7 @@ class CRUDStudent(CRUDBase[Student, UserCreate, UserUpdate]):
             year=obj_in.year,
             student_image_id=obj_in.student_id,
             full_name_arabic=obj_in.full_name_arabic,
-            hours_completed=obj_in.hours_completed
-        )
+            hours_completed=obj_in.hours_completed)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

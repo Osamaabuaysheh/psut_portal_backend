@@ -1,6 +1,7 @@
-from pydantic import BaseModel
-from typing import Optional
 from datetime import time
+from typing import Optional
+
+from pydantic import BaseModel
 
 
 class CourseSessionSchema(BaseModel):
@@ -13,16 +14,41 @@ class CourseSessionSchema(BaseModel):
         orm_mode = True
 
 
-class CreateCourseSession(CourseSessionSchema):
+class Session(BaseModel):
+    session_id: int
     start_time: time
     end_time: time
     day: str
-    course_id: int
-    student_id: int
 
     class Config:
         orm_mode = True
 
 
-class UpdateCourseSession(CourseSessionSchema):
-    pass
+class CreateCourseSession(CourseSessionSchema):
+    start_time: Optional[time]
+    end_time: Optional[time]
+    day: Optional[str]
+    course_id: int
+    tutor_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class CreateCourseSessionUpdated(CourseSessionSchema):
+    start_time: Optional[time]
+    end_time: Optional[time]
+    day: Optional[str]
+    course_id: int
+    tutor_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class UpdateCourseSession(BaseModel):
+    sessions: list[Session]
+    tutor_id: int
+
+    class Config:
+        orm_mode = True

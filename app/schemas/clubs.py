@@ -28,6 +28,8 @@ class ClubUpdate(BaseModel):
     description: Optional[str] = None
     link: Optional[str] = None
     contact_info: Optional[str] = None
+    club_image: Optional[str]
+    club_icon_image: Optional[str]
 
     class Config:
         orm_mode = True

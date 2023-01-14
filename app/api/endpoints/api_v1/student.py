@@ -38,27 +38,24 @@ def create_student(
         with open(f'static/images/Students/{file.filename}', 'wb') as f:
             while contents := file.file.read():
                 f.write(contents)
-                try:
-                    # Check Image
-                    image = crudStudentImage.get_by_name(db=db, image_name=file.filename)
-                    if image:
+
+                image = crudStudentImage.get_by_name(db=db, image_name=file.filename)
+                if image:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="The Image with this Name already exists in the system.")
+
+                if not image:
+                    crudStudentImage.create_image(db=db, std_id=user_in.student_id,
+                                                  filename=file.filename)
+                    # Check Users
+                    user = crudStudent.get_by_id(db=db, student_id=user_in.student_id)
+                    if user:
                         raise HTTPException(
                             status_code=400,
-                            detail="The Image with this Name already exists in the system.")
-                    if not image:
-                        db_image = crudStudentImage.create_image(db=db, std_id=user_in.student_id,
-                                                                 filename=file.filename)
-                        # Check Users
-                        user = crudStudent.get_by_email(db=db, student_email=user_in.email)
-                        if user:
-                            raise HTTPException(
-                                status_code=400,
-                                detail="The user with this username already exists in the system.",
-                            )
-
-                    return crudStudent.create_student(db=db, obj_in=user_in)
-                except:
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="BAD REQUEST")
+                            detail="The user with this username already exists in the system.",
+                        )
+                return crudStudent.create_student(db=db, obj_in=user_in)
 
     finally:
         file.file.close()

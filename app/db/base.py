@@ -1,8 +1,11 @@
 from app.db.base_class import Base  # noqa
 from app.models.BusRoute import BusRoute  # noqa
+from app.models.BusRouteImages import BusRouteImages  # noqa
 from app.models.CSOEvents import CSOEVENTS  # noqa
 from app.models.CSOEventsAttended import CSOEventsAttended  # noqa
+from app.models.CallLogsStudent import CallLogsStudent  # noqa
 from app.models.Club import Club  # noqa
+from app.models.ClubOrganizer import ClubOrganizer  # noqa
 from app.models.Club_Event import ClubEvent  # noqa
 from app.models.Course import Course  # noqa
 from app.models.CourseRequests import CourseRequests  # noqa

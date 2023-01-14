@@ -36,7 +36,6 @@ class CRUDEvents(CRUDBase[Event, CreateEvent, EventOut]):
         else:
             event.delete()
             db.commit()
-            db.refresh(event)
             return "Event Deleted"
 
     def create_event(self, db: Session, *, obj_in: CreateEvent, image_name: str, organizers,

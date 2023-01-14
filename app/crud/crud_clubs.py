@@ -19,21 +19,20 @@ class CRUDClubs(CRUDBase[Club, CreateClub, ClubUpdate]):
         db.commit()
         db.refresh(db_obj)
 
+    def create_club(self, db: Session, *, obj_in: CreateClub, club_icon_image: str, club_background_image: str):
+        db_obj = Club(
+            club_name=obj_in.club_name.upper(),
+            description=obj_in.description,
+            contact_info=obj_in.contact_info,
+            link=obj_in.link,
+            club_icon_image=f'static/images/Clubs/IconImages/{club_icon_image}',
+            club_image=f'static/images/Clubs/backgroundImage/{club_background_image}'
+        )
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
 
-def create_club(self, db: Session, *, obj_in: CreateClub, club_icon_image: str, club_background_image: str):
-    db_obj = Club(
-        club_name=obj_in.club_name.upper(),
-        description=obj_in.description,
-        contact_info=obj_in.contact_info,
-        link=obj_in.link,
-        club_icon_image=f'static/images/Clubs/IconImages/{club_icon_image}',
-        club_image=f'static/images/Clubs/backgroundImage/{club_background_image}'
-    )
-    db.add(db_obj)
-    db.commit()
-    db.refresh(db_obj)
-
-    return db_obj
+        return db_obj
 
 
 crudClubs = CRUDClubs(Club)

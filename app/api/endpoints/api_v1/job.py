@@ -42,7 +42,7 @@ async def get_jobs(*, db: Session = Depends(get_db), obj_in: JobCreate = Depends
         job_image.file.close()
 
 
-@router.delete('/delete_job/{job_id}')
+@router.post('/delete_job/{job_id}')
 async def get_jobs(*, db: Session = Depends(get_db), job_id: int,
                    current_user: User = Depends(get_current_user), ):
     job = db.query(Job).filter(Job.job_id == job_id)
@@ -53,10 +53,27 @@ async def get_jobs(*, db: Session = Depends(get_db), job_id: int,
         raise HTTPException(status_code=status.HTTP_200_OK, detail="Job Deleted Successfully")
 
 
-@router.patch('/job_id/{job_id}')
+@router.post('/job_id/{job_id}')
 async def update_job(*, db: Session = Depends(get_db), job_id: int,
                      current_user: User = Depends(get_current_user), job_in: JobUpdate = Depends(),
-                     job_image: UploadFile = File(...)):
-    db_obj = db.query(Job).filter(Job.job_id == job_id).update(values=job_in.dict(exclude_none=True))
-    db.commit()
-    return db_obj
+                     job_image: UploadFile = None):
+    if job_image is None:
+        db_obj = db.query(Job).filter(Job.job_id == job_id).update(values=job_in.dict(exclude_none=True))
+        db.commit()
+        return db_obj
+    else:
+        extension = job_image.filename.split(".")[1]
+        if extension not in ["png", "jpg", "jpeg"]:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="File extension not allowed For Backgound")
+
+        try:
+            with open(f'static/images/Jobs/{job_image.filename}', 'wb') as f:
+                while contents := job_image.file.read():
+                    f.write(contents)
+            job_in.job_icon_image = f'static/images/Jobs/{job_image.filename}'
+            db_obj = db.query(Job).filter(Job.job_id == job_id).update(values=job_in.dict(exclude_none=True))
+            db.commit()
+            return db_obj
+        finally:
+            job_image.file.close()

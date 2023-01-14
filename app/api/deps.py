@@ -11,13 +11,13 @@ from app.db.database import get_db
 from app.models import Student
 from app.models.User import User
 
+# reusable_oauth2_student = OAuth2PasswordBearer(
+#     tokenUrl="/login_student/access-token"
+# )
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl="/login/access-token"
 )
 
-reusable_oauth2_student = OAuth2PasswordBearer(
-    tokenUrl="/login_student/access-token"
-)
 
 def get_current_user(
         db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
@@ -40,7 +40,7 @@ def get_current_user(
 
 
 def get_current_student(
-        db: Session = Depends(get_db), token: str = Depends(reusable_oauth2_student)
+        db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> Student:
     try:
         payload = jwt.decode(

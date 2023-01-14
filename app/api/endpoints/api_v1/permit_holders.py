@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, get_current_student
 from app.crud.crud_permit_holder import crudPermitHolders
 from app.db.database import get_db
+from app.models.PermitHolders import PermitHolders
 from app.models.Student import Student
 from app.models.User import User
 from app.schemas.permitHolders import PermitHolderCreate
@@ -13,7 +14,14 @@ router = APIRouter()
 
 @router.get('/get_all_permit_numbers')
 async def get_permit_numbers(*, db: Session = Depends(get_db)):
-    return crudPermitHolders.get_multi(db=db)
+    permits = crudPermitHolders.get_multi(db=db)
+    for permit in permits:
+        student_name = db.query(Student).filter(permit.student_id == Student.student_id).first().full_name
+        student_college = db.query(Student).filter(permit.student_id == Student.student_id).first().colleage
+        permit = permit.__dict__
+        permit['student_name'] = student_name
+        permit['colleage'] = student_college
+    return permits
 
 
 @router.post('/create_permit_holder')
@@ -50,3 +58,10 @@ async def upload_permit_holder(*, db: Session = Depends(get_db), file: UploadFil
 
     finally:
         file.file.close()
+
+
+@router.post('/delete_all_permit_holders')
+async def delete_all(*, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    db.query(PermitHolders).delete()
+    db.commit()
+    raise HTTPException(status_code=status.HTTP_200_OK, detail="Successfully Deleted All Routes")

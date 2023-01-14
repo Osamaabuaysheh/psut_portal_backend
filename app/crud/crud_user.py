@@ -12,13 +12,20 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         return db.query(User).filter(User.email == email).first()
 
+    def delete_admin(self, db: Session, *, admin_id: str):
+        db_obj = db.query(User).filter(User.id == admin_id).delete()
+        db.commit()
+        return db_obj
+
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             full_name=obj_in.full_name,
             is_superuser=obj_in.is_superuser,
-            user_role=obj_in.user_role
+            user_role=obj_in.user_role,
+            is_active=obj_in.is_active
+
         )
         db.add(db_obj)
         db.commit()
@@ -32,8 +39,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
-        if update_data["password"]:
-            hashed_password = get_password_hash(update_data["password"])
+        if update_data["newPassword"]:
+            hashed_password = get_password_hash(update_data["newPassword"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)

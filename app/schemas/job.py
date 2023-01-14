@@ -54,4 +54,7 @@ class JobUpdate(BaseModel):
     college: Optional[str]
     job_Deadline: Optional[date]
     job_description: Optional[str]
-    pass
+    job_icon_image: Optional[str]
+
+    class Config:
+        orm_mode = True

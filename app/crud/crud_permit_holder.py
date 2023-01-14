@@ -70,7 +70,7 @@ class CRUDPermitHolders(CRUDBase[PermitHolders, PermitHolderCreate, PermitHolder
             except:
                 continue
 
-        return HTTPException(status_code=status.HTTP_200_OK, detail="Data Stored")
+        raise HTTPException(status_code=status.HTTP_200_OK, detail="Data Stored")
 
 
 def delete_event_by_id(self, db: Session, *, permit_id: int):

@@ -1,9 +1,11 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app.crud.base import CRUDBase
 from app.models.StudentImages import StudentImages
-from app.schemas.User import UserCreate, UserUpdate
 from app.schemas import Image
+from app.schemas.User import UserCreate, UserUpdate
 
 
 class CRUDStudentImages(CRUDBase[StudentImages, UserCreate, UserUpdate]):

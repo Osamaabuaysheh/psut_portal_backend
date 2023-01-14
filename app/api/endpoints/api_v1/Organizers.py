@@ -22,4 +22,15 @@ async def get_all_organizers(*, db: Session = Depends(get_db), org_in: Organizer
     if extension not in ["png", "jpg", "jpeg", "gif"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="File extension not allowed")
-    return crudOrganizer.create_organizer(db=db, obj_in=org_in, image_name=org_image.filename)
+    try:
+        with open(f'static/images/Organizers/{org_image.filename}', 'wb') as f:
+            while contents := org_image.file.read():
+                f.write(contents)
+
+        crudOrganizer.create_organizer(db=db, obj_in=org_in, image_name=org_image.filename)
+
+        raise HTTPException(status_code=status.HTTP_200_OK, detail="Event Created Successfully")
+
+    finally:
+        org_image.file.close()
+
