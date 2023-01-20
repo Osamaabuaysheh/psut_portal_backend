@@ -17,7 +17,7 @@ class CRUDEventClub(CRUDBase[ClubEvent, ClubsEventSchema, ClubEventCreate]):
             org = db.query(Club).filter(
                 ClubOrganizer.event_id == event.event_id).filter(ClubOrganizer.organizer_id == Club.club_id).all()
             for i in org:
-                obj = {"organizer_image": i.club_image,
+                obj = {"organizer_image": i.club_icon_image,
                        "organizer_id": i.club_id,
                        "organizer_name": i.club_name}
                 orgs.append(obj)

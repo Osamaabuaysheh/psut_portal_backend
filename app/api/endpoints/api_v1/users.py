@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_current_active_superuser
-from app.core.security import verify_password
+from app.core.security import verify_password, get_password_hash
 from app.crud.crud_user import crud_user
 from app.db.database import get_db
 from app.models.User import User
@@ -103,7 +103,15 @@ def update_admin(
         *, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), admin_id: int,
         obj_in: UserUpdate
 ) -> Any:
-
-    db.query(User).filter(User.id == admin_id).update(values=obj_in.dict(exclude_none=True))
-    db.commit()
-    raise HTTPException(status_code=status.HTTP_200_OK, detail="Admin Updated Successfully")
+    if obj_in.password is None:
+        db.query(User).filter(User.id == admin_id).update(values=obj_in.dict(exclude_none=True))
+        db.commit()
+        raise HTTPException(status_code=status.HTTP_200_OK, detail="Admin Updated Successfully")
+    else:
+        update_data = obj_in.dict(exclude_unset=True)
+        hashed_password = get_password_hash(obj_in.password)
+        del update_data["password"]
+        update_data["hashed_password"] = hashed_password
+        db.query(User).filter(User.id == admin_id).update(values=update_data)
+        db.commit()
+        raise HTTPException(status_code=status.HTTP_200_OK, detail="Admin Updated Successfully")

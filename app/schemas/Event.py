@@ -35,7 +35,7 @@ class CreateEvent(EventSchema):
         orm_mode = True
 
 
-class UpadteEvent(EventSchema):
+class UpadteEvent(BaseModel):
     event_name: Optional[str] = None
     location: Optional[str] = None
     start_date: Optional[date] = None
@@ -43,8 +43,7 @@ class UpadteEvent(EventSchema):
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     description: Optional[str] = None
-    organizers: Optional[list[str]] = None
-    image: Optional[str]
+    image: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -79,8 +78,6 @@ class ClubEventOut(EventOut):
     organizers: list[OrganizerSchema]
 
 
-
-
 class ClubEventCreate(BaseModel):
     event_name: str
     location: str
@@ -96,14 +93,14 @@ class ClubEventCreate(BaseModel):
 
 
 class UpdateClubEvent(BaseModel):
-    event_name: str
-    location: str
-    start_date: date
-    end_date: date
-    start_time: time
-    end_time: time
-    description: str
-    club_organizer: int
+    event_name: Optional[str] = None
+    location: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    description: Optional[str] = None
+    image: Optional[str] = None
 
     class Config:
         orm_mode = True

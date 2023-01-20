@@ -58,61 +58,28 @@ async def delete_event(*, db: Session = Depends(get_db), event_id: int,
 @router.post('/update_event/{id}')
 async def update_event(*, db: Session = Depends(get_db), id: int, current_user: User.User = Depends(get_current_user),
                        obj_in: UpadteEvent = Depends(), event_image: UploadFile = None):
-    if event_image is None and obj_in.organizers[0] == '':
-        del obj_in.organizers
+    if event_image is None:
         db.query(Events.Event).filter(Events.Event.event_id == id).update(
             values=obj_in.dict(exclude_none=True))
         db.commit()
         raise HTTPException(status_code=status.HTTP_200_OK, detail="Event Updated Successfully")
-    if event_image is None:
-        if obj_in.organizers[0] != '':
-            organizers = obj_in.organizers[0].split(',')
-            del obj_in.organizers
+
+    if event_image is not None:
+        extension = event_image.filename.split(".")[1]
+        if extension not in ["png", "jpg", "jpeg"]:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="File extension not allowed For Backgound")
+        try:
+            with open(f'static/images/Events/{event_image.filename}', 'wb') as f:
+                while contents := event_image.file.read():
+                    f.write(contents)
+            obj_in.image = f'static/images/Events/{event_image.filename}'
             db.query(Events.Event).filter(Events.Event.event_id == id).update(
                 values=obj_in.dict(exclude_none=True))
             db.commit()
-            for i in organizers:
-                db.query(EventOrganizer).filter(EventOrganizer.event_id == id).update(values={'organizer_id': i})
-                db.commit()
             raise HTTPException(status_code=status.HTTP_200_OK, detail="Event Updated Successfully")
-    if obj_in.organizers is None:
-        if event_image is not None:
-            extension = event_image.filename.split(".")[1]
-            if extension not in ["png", "jpg", "jpeg"]:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                    detail="File extension not allowed For Backgound")
-            try:
-                with open(f'static/images/Events/{event_image.filename}', 'wb') as f:
-                    while contents := event_image.file.read():
-                        f.write(contents)
-                obj_in.image = f'static/images/Events/{event_image.filename}'
-                db.query(Events.Event).filter(Events.Event.event_id == id).update(
-                    values=obj_in.dict(exclude_none=True))
-                db.commit()
-                raise HTTPException(status_code=status.HTTP_200_OK, detail="Event Updated Successfully")
-            finally:
-                event_image.file.close()
-
-    extension = event_image.filename.split(".")[1]
-    if extension not in ["png", "jpg", "jpeg"]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="File extension not allowed For Backgound")
-    try:
-        with open(f'static/images/Events/{event_image.filename}', 'wb') as f:
-            while contents := event_image.file.read():
-                f.write(contents)
-        obj_in.image = f'static/images/Events/{event_image.filename}'
-        organizers = obj_in.organizers[0].split(',')
-        del obj_in.organizers
-        db.query(Events.Event).filter(Events.Event.event_id == id).update(
-            values=obj_in.dict(exclude_none=True))
-        db.commit()
-        for i in organizers:
-            db.query(EventOrganizer).filter(EventOrganizer.event_id == id).update(values={'organizer_id': i})
-            db.commit()
-        raise HTTPException(status_code=status.HTTP_200_OK, detail="Event Updated Successfully")
-    finally:
-        event_image.file.close()
+        finally:
+            event_image.file.close()
 
 
 @router.post('/add_organizer_event')

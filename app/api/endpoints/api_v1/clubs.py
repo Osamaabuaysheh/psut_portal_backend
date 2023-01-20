@@ -107,17 +107,6 @@ async def create_club_event(*, db: Session = Depends(get_db), event_in: ClubEven
         event_image.file.close()
 
 
-@router.delete('/delete_club/{club_id}')
-async def delete_event(*, db: Session = Depends(get_db), club_id: int,
-                       current_user: User = Depends(get_current_user)):
-    club = db.query(Club.Club).filter(Club.Club.club_id == club_id)
-    if club.first() is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Club Not Found")
-    else:
-        crudClubs.delete_club_by_id(db=db, club_id=club_id)
-        raise HTTPException(status_code=status.HTTP_200_OK, detail="Club Deleted Successfully")
-
-
 @router.post('/delete_club_event/{event_id}')
 async def delete_event(*, db: Session = Depends(get_db), event_id: int,
                        current_user: User = Depends(get_current_user)):
@@ -272,7 +261,7 @@ async def add_club_organizer_event(*, db: Session = Depends(get_db), event_id: i
 
 @router.post('/delete_club_organizer_event')
 async def delete__club_eve_org(*, db: Session = Depends(get_db), org_id: int, event_id: int,
-                         current_user: User = Depends(get_current_user)):
+                               current_user: User = Depends(get_current_user)):
     obj = db.query(ClubOrganizer).filter(
         ClubOrganizer.organizer_id == org_id and ClubOrganizer.event_id == event_id).delete()
     db.commit()

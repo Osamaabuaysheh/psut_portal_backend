@@ -39,14 +39,3 @@ async def create_cso_event(*, db: Session = Depends(get_db), obj_in: CreateCSOEv
 
     finally:
         event_image.file.close()
-
-
-@router.delete('/delete_cso_event/{event_id}')
-async def get_cso_events(*, db: Session = Depends(get_db), event_id: int
-                         , current_user: User.User = Depends(get_current_user)):
-    event = db.query(CSOEvents).filter(CSOEvents.CSOEVENTS.event_id == event_id)
-    if event.first() is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Event Doesn't Exist")
-    else:
-        crudCSOEvents.delete_cso_event(db=db, event_id=event_id)
-        raise HTTPException(status_code=status.HTTP_200_OK, detail="Event Deleted Successfully")

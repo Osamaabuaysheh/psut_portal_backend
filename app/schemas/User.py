@@ -24,6 +24,7 @@ class UserUpdate(BaseModel):
     is_superuser: bool = False
     full_name: Optional[str] = None
     user_role: Optional[str] = None
+    password: Optional[str] = None
 
 
 class UserLogin(BaseModel):
